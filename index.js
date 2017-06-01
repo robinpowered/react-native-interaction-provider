@@ -1,6 +1,35 @@
 import React, {PropTypes} from 'react';
 import {PanResponder} from 'react-native';
 
+const CHANNEL = '__interaction-manager__';
+
+class InactivitySubscription {
+  constructor (duration, subscriber) {
+    this.duration = duration;
+    this.subscriber = subscriber;
+  }
+
+  refreshTimeout() {
+    this.clearTimeout();
+
+    this.timeout = setTimeout(() => {
+      this.subscriber();
+      this.clearTimeout();
+    }, this.duration);
+  }
+
+  clearTimeout() {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.timeout = null;
+    }
+  }
+
+  isPending() {
+    return !!this.timeout;
+  }
+}
+
 
 /**
  * A behavioral wrapper that decorates a child component with interaction detections.
@@ -22,9 +51,44 @@ class InteractionContainer extends React.Component {
     timeout: 60 * 1000 // 1m
   };
 
+  static childContextTypes = {
+    interactionProvider: React.PropTypes.object.isRequired
+  };
+
+  // static contextTypes = {
+  //   interactionProvider: PropTypes.object
+  // };
+
   constructor(props) {
     super(props);
-    this.inactiveTimer = null;
+
+    this.inactivitySubscription = new InactivitySubscription(props.timeout, this.onInactive);
+    this.subscriptions = [];
+
+    this.subscribeForInactivity = this.subscribeForInactivity.bind(this);
+  }
+
+  getChildContext() {
+    return {
+      interactionProvider: {
+        subscribeForInactivity: this.subscribeForInactivity
+      }
+    };
+  }
+
+  subscribeForInactivity(duration, subscriber) {
+    var subscription = new InactivitySubscription(duration, subscriber);
+    this.subscriptions.push(subscription);
+    subscription.refreshTimeout();
+
+    // unsubscribe
+    return () => {
+      var index = this.subscriptions.indexOf(subscription);
+      if (index > -1) {
+        this.subscriptions[index].clearTimeout();
+        this.subscriptions.splice(index, 1);
+      }
+    }
   }
 
   /**
@@ -59,12 +123,16 @@ class InteractionContainer extends React.Component {
    * @return {Boolean} `false` to prevent capturing the gesture.
    */
   onPanResponderCapture () {
-    if (!this.inactiveTimer && this.props.onActive) {
+    if (!this.inactivitySubscription.isPending() && this.props.onActive) {
       this.props.onActive();
     }
 
     this.refreshInactiveTimer();
     return false;
+  }
+
+  onInactive() {
+    this.props.onInactive();
   }
 
   /**
@@ -73,10 +141,7 @@ class InteractionContainer extends React.Component {
    * @return {void}
    */
   startInactiveTimer() {
-    this.inactiveTimer = setTimeout(() => {
-      this.props.onInactive();
-      this.inactiveTimer = null;
-    }, this.props.timeout);
+    this.refreshInactiveTimer();
   }
 
   /**
@@ -85,8 +150,8 @@ class InteractionContainer extends React.Component {
    * @return {void}
    */
   stopInactiveTimer() {
-    clearTimeout(this.inactiveTimer);
-    this.inactiveTimer = null;
+    this.inactivitySubscription.clearTimeout();
+    this.subscriptions.forEach(subscription => subscription.clearTimeout());
   }
 
   /**
@@ -95,8 +160,8 @@ class InteractionContainer extends React.Component {
    * @returns {void}.
    */
   refreshInactiveTimer() {
-    this.stopInactiveTimer();
-    this.startInactiveTimer();
+    this.inactivitySubscription.refreshTimeout();
+    this.subscriptions.forEach(subscription => subscription.refreshTimeout());
   }
 
   /**
