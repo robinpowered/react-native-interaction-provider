@@ -15,7 +15,8 @@ import InteractionProvider from 'react-native-interaction-provider'
 
 <InteractionProvider
   timeout={60 * 1000} // idle after 1m
-  onInactive={() => this.props.dismiss()}
+  onActive={() => console.log('User no longer idle')}
+  onInactive={() => console.log('User is idle, dismiss the screen or something')}
 >
   <YourScreen />
 </InteractionProvider>
@@ -45,5 +46,27 @@ class YourScreen extends React.Component {
       </View>
     );
   }
+}
+```
+
+## Roadmap
+
+`context` support for registering specific inactivity rules and callbacks:
+
+```js
+componentDidMount() {
+  this.sub = this.context.interactionProvider.register(10 * 1000, this.onActive, this.onInactive)
+}
+
+componentWillUnmount() {
+  this.sub.remove()
+}
+
+onActive() {
+  console.log('user is active')
+}
+
+onInactive() {
+  console.log('user is inactive after 10s')
 }
 ```
