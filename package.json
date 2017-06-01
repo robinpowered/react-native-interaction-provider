@@ -1,0 +1,27 @@
+{
+  "name": "react-native-interaction-provider",
+  "version": "0.0.1",
+  "description": "Determines if a user is interacting with the application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robinpowered/react-native-interaction-provider.git"
+  },
+  "keywords": [
+    "react-native",
+    "interactions"
+  ],
+  "author": "Atticus White <atticus@robinpowered.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/robinpowered/react-native-interaction-provider/issues"
+  },
+  "homepage": "https://github.com/robinpowered/react-native-interaction-provider#readme"
+}
