@@ -4,16 +4,33 @@ import {PanResponder} from 'react-native';
 const CHANNEL = '__interaction-manager__';
 
 class InactivitySubscription {
-  constructor (duration, subscriber) {
+  constructor (duration, onActive, onInactive) {
     this.duration = duration;
-    this.subscriber = subscriber;
+    this.onActive = onActive;
+    this.onInactive = onInactive;
+  }
+
+  active() {
+    if (this.onActive) {
+      this.onActive();
+    }
+  }
+
+  inactive() {
+    if (this.onInactive) {
+      this.onInactive();
+    }
+  }
+
+  isPending() {
+    return !!this.timeout;
   }
 
   refreshTimeout() {
     this.clearTimeout();
 
     this.timeout = setTimeout(() => {
-      this.subscriber();
+      this.inactive();
       this.clearTimeout();
     }, this.duration);
   }
@@ -23,10 +40,6 @@ class InactivitySubscription {
       clearTimeout(this.timeout);
       this.timeout = null;
     }
-  }
-
-  isPending() {
-    return !!this.timeout;
   }
 }
 
@@ -62,22 +75,34 @@ class InteractionContainer extends React.Component {
   constructor(props) {
     super(props);
 
-    this.inactivitySubscription = new InactivitySubscription(props.timeout, this.onInactive);
-    this.subscriptions = [];
+    this.onActive = this.onActive.bind(this);
+    this.onInactive = this.onInactive.bind(this);
 
+    this.subscribe = this.subscribe.bind(this);
+    this.subscribeForActivity = this.subscribeForActivity.bind(this);
     this.subscribeForInactivity = this.subscribeForInactivity.bind(this);
+
+    this.inactivitySubscription = new InactivitySubscription(
+      props.timeout,
+      this.onActive,
+      this.onInactive
+    );
+
+    this.subscriptions = [this.inactivitySubscription];
   }
 
   getChildContext() {
     return {
       interactionProvider: {
+        subscribe: this.subscribe,
+        subscribeForActivity: this.subscribeForActivity,
         subscribeForInactivity: this.subscribeForInactivity
       }
     };
   }
 
-  subscribeForInactivity(duration, subscriber) {
-    var subscription = new InactivitySubscription(duration, subscriber);
+  subscribe(duration, onActive, onInactive) {
+    var subscription = new InactivitySubscription(duration, onActive, onInactive);
     this.subscriptions.push(subscription);
     subscription.refreshTimeout();
 
@@ -89,6 +114,14 @@ class InteractionContainer extends React.Component {
         this.subscriptions.splice(index, 1);
       }
     }
+  }
+
+  subscribeForInactivity(duration, onInactive) {
+    return this.subscribe(duration, null, onInactive);
+  }
+
+  subscribeForActivity(duration, onActive) {
+    return this.subscribe(duration, onActive, null);
   }
 
   /**
@@ -123,16 +156,25 @@ class InteractionContainer extends React.Component {
    * @return {Boolean} `false` to prevent capturing the gesture.
    */
   onPanResponderCapture () {
-    if (!this.inactivitySubscription.isPending() && this.props.onActive) {
-      this.props.onActive();
-    }
-
-    this.refreshInactiveTimer();
+    this.subscriptions.forEach(subscription => {
+      if (!subscription.isPending()) {
+        subscription.active();
+      }
+      subscription.refreshTimeout();
+    });
     return false;
   }
 
   onInactive() {
-    this.props.onInactive();
+    if (this.props.onInactive) {
+      this.props.onInactive();
+    }
+  }
+
+  onActive() {
+    if (this.props.onActive) {
+      this.props.onActive();
+    }
   }
 
   /**
@@ -150,7 +192,7 @@ class InteractionContainer extends React.Component {
    * @return {void}
    */
   stopInactiveTimer() {
-    this.inactivitySubscription.clearTimeout();
+    // this.inactivitySubscription.clearTimeout();
     this.subscriptions.forEach(subscription => subscription.clearTimeout());
   }
 
@@ -160,7 +202,7 @@ class InteractionContainer extends React.Component {
    * @returns {void}.
    */
   refreshInactiveTimer() {
-    this.inactivitySubscription.refreshTimeout();
+    // this.inactivitySubscription.refreshTimeout();
     this.subscriptions.forEach(subscription => subscription.refreshTimeout());
   }
 
