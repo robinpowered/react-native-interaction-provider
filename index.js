@@ -106,14 +106,18 @@ class InteractionContainer extends React.Component {
     this.subscriptions.push(subscription);
     subscription.refreshTimeout();
 
-    // unsubscribe
-    return () => {
+    function remove() {
       var index = this.subscriptions.indexOf(subscription);
+      subscription.clearTimeout();
       if (index > -1) {
-        this.subscriptions[index].clearTimeout();
         this.subscriptions.splice(index, 1);
       }
     }
+
+    // unsubscribe
+    return {
+      remove
+    };
   }
 
   subscribeForInactivity(duration, onInactive) {
