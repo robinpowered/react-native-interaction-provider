@@ -58,22 +58,20 @@ class InteractionProvider extends React.Component {
     this.subscriptions.push(subscription);
     subscription.refreshTimeout();
 
-    /**
-     * Removes the subscription.
-     *
-     * @returns {void}
-     */
-    function remove() {
-      var index = this.subscriptions.indexOf(subscription);
-      subscription.clearTimeout();
-      if (index > -1) {
-        this.subscriptions.splice(index, 1);
-      }
-    }
-
     // The public API of the subscription.
     return {
-      remove
+      /**
+       * Removes the subscription.
+       *
+       * @returns {void}
+       */
+      remove: () => {
+        var index = this.subscriptions.indexOf(subscription);
+        subscription.clearTimeout();
+        if (index > -1) {
+          this.subscriptions.splice(index, 1);
+        }
+      }
     };
   }
 

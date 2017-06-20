@@ -43,7 +43,7 @@ function withInteractionProps(WrappedComponent, {duration}) {
       const {
         children,
         ...props
-      };
+      } = this.props;
 
       const child = React.Children.only(children);
 
