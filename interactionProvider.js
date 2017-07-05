@@ -47,8 +47,7 @@ class InteractionProvider extends React.Component {
    * Creates an interaction subscription that will observe periods of inactivity and when inactivity becomes resumed.
    *
    * @memberof InteractionContainer
-   * @param {number} duration The amount of time, in miliseconds, for a period of time to
-   *  be considered inactive.
+   * @param {number} duration The amount of time, in miliseconds, after which the interaction is considered inactive.
    * @param {?Function} onActive A subscriber function that is called when activity resumes.
    * @param {?Function} onInactive A subscriber function that is called upon inactivity.
    * @returns {Object} The subscription API.
@@ -79,8 +78,7 @@ class InteractionProvider extends React.Component {
    * Creates an interaction subscription that will observe periods of inactivity.
    *
    * @memberof InteractionContainer
-   * @param {number} duration The amount of time, in miliseconds, for a period of time to
-   *  be considered inactive.
+   * @param {number} duration The amount of time, in miliseconds, after which the interaction is considered inactive.
    * @param {Function} onInactive A subscriber function that is called upon inactivity.
    * @returns {Object} The subscription API.
    */
@@ -92,8 +90,7 @@ class InteractionProvider extends React.Component {
    * Creates an interaction subscription that will observe when a period of inactivity beomes active again.
    *
    * @memberof InteractionContainer
-   * @param {number} duration The amount of time, in miliseconds, for a period of inactivity to
-   *  to pass before the next interaction is considered a resuming action.
+   * @param {number} duration The amount of time, in miliseconds, after which the interaction is considered inactive.
    * @param {Function} onActive A subscriber function that is called when activity resumes.
    * @returns {Object} The subscription API.
    */
