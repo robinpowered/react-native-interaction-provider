@@ -1,6 +1,6 @@
 {
   "name": "react-native-interaction-provider",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Determines if a user is interacting with the application",
   "main": "index.js",
   "scripts": {
