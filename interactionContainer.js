@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import InteractionProvider from './interactionProvider';
 
 /**
@@ -31,7 +32,7 @@ class InteractionContainer extends React.Component {
   };
 
   static contextTypes = {
-    interactionProvider: React.PropTypes.object.isRequired
+    interactionProvider: PropTypes.object.isRequired
   };
 
   componentDidMount() {

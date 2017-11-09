@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {PanResponder} from 'react-native';
 import InteractionSubscription from './subscription';
 
@@ -20,7 +21,7 @@ import InteractionSubscription from './subscription';
  */
 class InteractionProvider extends React.Component {
   static childContextTypes = {
-    interactionProvider: React.PropTypes.object.isRequired
+    interactionProvider: PropTypes.object.isRequired
   };
 
   constructor(props) {
